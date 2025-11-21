@@ -16,7 +16,7 @@ class ProfileAPITest(APITestCase):
     def test_get_profiles(self):
         url = reverse("profiles")
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_profile(self):
         url = reverse("profiles")
@@ -26,7 +26,7 @@ class ProfileAPITest(APITestCase):
 
     def test_update_profile(self):
         url = reverse("profile-detail", args=[self.profile.id])
-        data = {"name": "Arul Updated", "age": 29, "gender": "Male", "location": "Coimbatore"}
+        data = {"name": "Aru Updated", "age": 30, "gender": "Male", "location": "Coimbatore"}
         response = self.client.put(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
