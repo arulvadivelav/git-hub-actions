@@ -3,9 +3,6 @@ name: Django CI/CD
 on:
   push:
     branches:
-      - dev
-  pull_request:
-    branches:
       - main
 
 jobs:
@@ -40,7 +37,7 @@ jobs:
     name: Deploy to EC2
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,7 +47,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      - name: Copy files to EC2
+      - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
             cd /var/www/all-projects/git-hub-actions/gitHubActions &&
@@ -59,5 +56,6 @@ jobs:
             pip install -r requirements.txt &&
             python manage.py migrate --run-syncdb &&
             python manage.py collectstatic --noinput &&
-            sudo systemctl restart gunicorn || true
+            pkill -f runserver || true &&
+            nohup python manage.py runserver 0.0.0.0:8000 &
           "
