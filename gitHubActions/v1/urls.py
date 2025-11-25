@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ProfileListCreateView, ProfileRetrieveUpdateView, StaticListAPIView
+from .views import ProfileListCreateView, ProfileRetrieveUpdateView
 
 urlpatterns = [
     path("profiles/", ProfileListCreateView.as_view(), name="profiles"),
