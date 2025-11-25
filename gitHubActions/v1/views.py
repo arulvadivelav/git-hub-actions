@@ -13,11 +13,11 @@ class ProfileRetrieveUpdateView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
-class StaticListAPIView(APIView):
-    def get(self, request):
-        data = [
-            {"id": 1, "name": "Arul", "role": "Developer"},
-            {"id": 2, "name": "Vijay", "role": "Tester"},
-            {"id": 3, "name": "Kumar", "role": "Manager"},
-        ]
-        return Response(data, status=status.HTTP_200_OK)
+# class StaticListAPIView(APIView):
+#     def get(self, request):
+#         data = [
+#             {"id": 1, "name": "Arul", "role": "Developer"},
+#             {"id": 2, "name": "Vijay", "role": "Tester"},
+#             {"id": 3, "name": "Kumar", "role": "Manager"},
+#         ]
+#         return Response(data, status=status.HTTP_200_OK)
