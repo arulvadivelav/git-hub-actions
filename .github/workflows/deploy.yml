@@ -34,6 +34,11 @@ jobs:
 
             python manage.py migrate
 
-            pkill -f runserver || true
-
-            nohup python manage.py runserver 0.0.0.0:8000 &
+            # kill old server if running
+            screen -S django -X quit || true
+          
+            # start new detached screen
+            screen -dmS django bash -c "python3 manage.py runserver 0.0.0.0:8000"
+          
+            # ensure SSH disconnects cleanly
+            sleep 3
