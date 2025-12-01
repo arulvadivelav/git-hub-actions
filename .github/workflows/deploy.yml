@@ -1,4 +1,4 @@
-name: Django CI/CD
+name: Django CD
 
 on:
   push:
@@ -6,56 +6,34 @@ on:
       - main
 
 jobs:
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install dependencies
-        working-directory: gitHubActions
-        run: |
-          pip install -r requirements.txt
-          
-      - name: Run Migrations
-        working-directory: gitHubActions
-        run: |
-          python manage.py migrate --run-syncdb
-          
-      - name: Run Django tests
-        working-directory: gitHubActions
-        run: |
-          python manage.py test
-
   deploy:
-    name: Deploy to EC2
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Deploy to EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
-            cd /var/www/all-projects/git-hub-actions/gitHubActions &&
-            git pull &&
-            source venv/bin/activate &&
-            pip install -r requirements.txt &&
-            python3 manage.py migrate --run-syncdb &&
-            python3 manage.py collectstatic --noinput &&
-            pkill -f runserver || true &&
-            nohup python3 manage.py runserver 0.0.0.0:8000 &
-          "
+        uses: appleboy/ssh-action@v1
+
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          script: |
+            source var/www/all-projects/github_actions_venv/bin/activate
+
+            cd var/www/all-projects/git-hub-actions/gitHubActions
+            
+            git pull origin main
+
+            pip install -r requirements.txt
+
+            python manage.py migrate
+
+            pkill -f runserver || true
+
+            nohup python manage.py runserver 0.0.0.0:8000 &
